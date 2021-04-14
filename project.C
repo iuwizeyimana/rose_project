@@ -11,7 +11,7 @@
 #include <string>
 using namespace std;
 
-#define BRAMSIZE 3072
+#define BRAMSIZE 82944
 #define BANDWIDTH 4
 #define COMPM 1000
 
@@ -277,6 +277,8 @@ int main (int argc, char *argv[]) {
        	   }
 	 }
 	} //end of dse loop
+
+	cout << "best c2c" << max_comp.c2c << endl;
 	// 2. tile every other loop but the inner loop
 	// inner loop tiled last to ensure it appear in the inner-most tile
 	int ub[4] = {M, N, R, C}; // holds the ub for smooter programing
