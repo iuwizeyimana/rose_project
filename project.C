@@ -8,12 +8,13 @@
 
 #include "rose.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 using namespace std;
 
 #define BRAMSIZE 82944
 #define BANDWIDTH 4
-#define COMPM 1000
+#define COMPM 220
 
 //global values
 int R, C, M, N, K;
@@ -333,10 +334,19 @@ int main (int argc, char *argv[]) {
 	/****************** Pragma Insertion: add the unroll and dataflow pragmas *********/
 	
 	//the two inner loops are unrolled
-	string unroll_pragma("#pragma HLS UNROLL");
+	stringstream ss;  
+	string str;
+	ss << max_comp.tiles[1];  
+  	ss >> str;
+	string unroll_pragma = "#pragma HLS UNROLL factor = " + str ;
 	SgForStatement* inner_loop = isSgForStatement(loops[5]); //used to put before 2nd loopnest
 	SgPntrArrRefExp* arr = isSgPntrArrRefExp(arrayAccess[0]);//used to put inside 1st loopnest
 	SageInterface::attachArbitraryText(inner_loop, unroll_pragma, PreprocessingInfo::before);
+	stringstream ss_;
+	string str2;
+	ss_ << max_comp.tiles[0];  
+  	ss_ >> str2;
+	unroll_pragma = "#pragma HLS UNROLL factor = " + str2 ;
 	SageInterface::attachArbitraryText(arr, unroll_pragma, PreprocessingInfo::before);
 	//add the dataflow pragma inside the inner loop nest for tiles
 	string dtflow_pragma("#pragma HLS DATAFLOW");
