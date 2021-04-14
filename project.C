@@ -517,9 +517,6 @@ int main (int argc, char *argv[]) {
 	if(max_comp.inner == 0) loop_nest = isSgForStatement(loops_[3]); 
 	else loop_nest = isSgForStatement(loops_[4]);
 	scope = loop_nest->get_scope(); //get scope
-	//0) insert the label stmt
-	label_stmt = SageBuilder::buildLabelStatement("load_out");
-	SageInterface::insertStatementBefore(loop_nest, label_stmt);
 	// 1) build the array to hold the output buffer
 	// 1.a build the array type
 	// 1.b build the array declaration
@@ -543,14 +540,14 @@ int main (int argc, char *argv[]) {
 	ROSE_ASSERT(decl);
 	SageInterface::insertStatementBefore(loop_nest,decl);
 	
-	//2. build the temp value for the input
-	decl = SageBuilder::buildVariableDeclaration("hold_out", SageBuilder::buildIntType(), NULL, scope);
-	ROSE_ASSERT(decl);
-	SageInterface::insertStatementBefore(loop_nest,decl);
+	//2. build the temp value for the input - not needed here
+//	decl = SageBuilder::buildVariableDeclaration("hold_out", SageBuilder::buildIntType(), NULL, scope);
+//	ROSE_ASSERT(decl);
+//	SageInterface::insertStatementAfter(loop_nest,decl);
 
 	//3. build the 3 nested loops for storing values in the w_buffer
 	stmt1 = SageBuilder::buildVariableDeclaration("c2", SageBuilder::buildIntType(), NULL, scope);
-	SageInterface::insertStatementBefore(loop_nest,stmt1);
+	SageInterface::insertStatementAfter(loop_nest,stmt1);
 	// for(c = 0;...)
 	init_stmt = SageBuilder::buildAssignStatement(SageBuilder::buildVarRefExp("c2", scope),SageBuilder::buildIntVal(0)); 
 	//for(...; c<K;...)
@@ -560,8 +557,8 @@ int main (int argc, char *argv[]) {
 	 for_loop_2 = SageBuilder::buildForStatement(init_stmt, cond_stmt,incr_exp, SageBuilder::buildBasicBlock());
 	
 	
-	stmt1 = SageBuilder::buildVariableDeclaration("b2", SageBuilder::buildIntType(), NULL, scope);
-	SageInterface::insertStatementBefore(loop_nest,stmt1);
+	SgVariableDeclaration* stmt2 = SageBuilder::buildVariableDeclaration("b2", SageBuilder::buildIntType(), NULL, scope);
+	SageInterface::insertStatementAfter(stmt1,stmt2);
 	// for(b = 0;...)
 	init_stmt = SageBuilder::buildAssignStatement(SageBuilder::buildVarRefExp("b2", scope),SageBuilder::buildIntVal(0)); 
 	//for(...; b<Tn;...)
@@ -570,8 +567,8 @@ int main (int argc, char *argv[]) {
 	incr_exp = SageBuilder::buildPlusPlusOp(SageBuilder::buildVarRefExp("b2", scope),SgUnaryOp::postfix);
 	 for_loop_3 = SageBuilder::buildForStatement(init_stmt, cond_stmt,incr_exp, SageBuilder::buildBasicBlock());
  
-	stmt1 = SageBuilder::buildVariableDeclaration("a2", SageBuilder::buildIntType(), NULL, scope);
-	SageInterface::insertStatementBefore(loop_nest,stmt1);
+	SgVariableDeclaration* stmt3 = SageBuilder::buildVariableDeclaration("a2", SageBuilder::buildIntType(), NULL, scope);
+	SageInterface::insertStatementAfter(stmt2,stmt3);
 	// for(a = 0;...)
 	init_stmt = SageBuilder::buildAssignStatement(SageBuilder::buildVarRefExp("a2", scope),SageBuilder::buildIntVal(0)); 
 	//for(...; a<Tn;...)
@@ -579,14 +576,17 @@ int main (int argc, char *argv[]) {
 	//for (...;...; a++)
 	incr_exp = SageBuilder::buildPlusPlusOp(SageBuilder::buildVarRefExp("a2", scope),SgUnaryOp::postfix); 
 	 for_loop_4 = SageBuilder::buildForStatement(init_stmt, cond_stmt,incr_exp, SageBuilder::buildBasicBlock());
-	SageInterface::insertStatementBefore(loop_nest, for_loop_4);
+	SageInterface::insertStatementAfter(stmt3, for_loop_4);
 	SageInterface::appendStatement(for_loop_3,isSgBasicBlock(for_loop_4->get_loop_body()));
 	SageInterface::appendStatement(for_loop_2,isSgBasicBlock(for_loop_3->get_loop_body()));
 
 	//4. add the inner part of the load weight loops
-	inner_bod = "if(!"+out_name+".empty()){"+in_name+">> hold_out; out_buff[a2][b2][c2] = hold_out;}";
+	inner_bod = out_name+"<< out_buff[a2][b2][c2];";
 	SageInterface::attachArbitraryText(isSgBasicBlock(for_loop_2->get_loop_body()), inner_bod, PreprocessingInfo::inside);
 
+	//0) insert the label stmt
+	label_stmt = SageBuilder::buildLabelStatement("store_out");
+	SageInterface::insertStatementAfter(loop_nest, label_stmt);
 	//add the compute label after you performed all the loads
 	loop_nest = isSgForStatement(loops_[4]);
 	label_stmt = SageBuilder::buildLabelStatement("compute");

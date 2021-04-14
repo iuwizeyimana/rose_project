@@ -19,19 +19,7 @@ void conv(hls::stream<int>& out, hls::stream<int>& w, hls::stream<int>& in)
       int _lt_var_col;
       for (_lt_var_col = 0; _lt_var_col <= 12; _lt_var_col += 7) {
         int _lt_var_to;
-        load_out:
         int out_buff[17][7][7];
-        int hold_out;
-        int c2;
-        int b2;
-        int a2;
-        for (a2 = 0; a2 < 17; a2++) {
-          for (b2 = 0; b2 < 7; b2++) {
-            for (c2 = 0; c2 < 7; c2++) {
-if(!out.empty()){in>> hold_out; out_buff[a2][b2][c2] = hold_out;}
-            }
-          }
-        }
         for (_lt_var_to = 0; _lt_var_to <= 191; _lt_var_to += 17) {
 #pragma HLS DATAFLOW
           load_w:
@@ -80,6 +68,17 @@ out[to][row][col] += (w[to][ti][i][j] * in[ti][row + i][col + j]);
                   }
                 }
               }
+            }
+          }
+        }
+        store_out:
+        int c2;
+        int b2;
+        int a2;
+        for (a2 = 0; a2 < 17; a2++) {
+          for (b2 = 0; b2 < 7; b2++) {
+            for (c2 = 0; c2 < 7; c2++) {
+out<< out_buff[a2][b2][c2];
             }
           }
         }
