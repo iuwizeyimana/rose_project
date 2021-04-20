@@ -12,11 +12,13 @@
 #include <string>
 using namespace std;
 
-#define BRAMSIZE 82944
-#define BANDWIDTH 4
-#define COMPM 220
+#define BRAMSIZE 420000
+//#define BANDWIDTH 4
+#define COMPM 4400000000
+#define DSP 220
 
 //global values
+int BANDWIDTH = 4*(10^9);
 int R, C, M, N, K;
 int tile_indices[4]; // to be tiled tm_index, tn_index, tr_index, tc_index;
 string in_name, w_name, out_name;
@@ -212,6 +214,7 @@ int main (int argc, char *argv[]) {
 	  for(int tc= (C<3)? C:3; tc<C; tc++){
 	    for(int tm = (M<3)? M:3; tm<M; tm++){
 	      for(int tn= (N<3)? N:3; tn<N; tn++){
+		if( tm*tn > DSP) continue;
 		 int comp = (2*R*C*M*N*K*K)/ ((M/tm)*(N/tn)*R*C*K*K);
 		 int b_in = tn*(tr+K-1)*(tc+K-1);
 		 int b_wgt = tm*tn*K*K;
@@ -224,7 +227,7 @@ int main (int argc, char *argv[]) {
 		 int d_in = (N/tn)*(R/tr)*(C/tc);
 		 int d_w = (M/tm)*(N/tn)*(R/tr)*(C/tc);
 		 int c2c = (2*R*C*M*N*K*K)/((d_in*b_in)+(d_out*b_out)+(d_w*b_wgt));
-		 best_c2c = c2c;
+		 best_c2c = c2c*4;
 		 // b. tn inner 
 		 d_out = (M/tm)*(R/tr)*(C/tc);
 		 d_in = (M/tm)*(N/tn)*(R/tr)*(C/tc);
@@ -279,7 +282,8 @@ int main (int argc, char *argv[]) {
 	 }
 	} //end of dse loop
 
-	cout << "best c2c" << max_comp.c2c << endl;
+	cout << "best c2c: " << max_comp.c2c << endl;
+	cout << "best comp: " << max_comp.comp << endl;
 	// 2. tile every other loop but the inner loop
 	// inner loop tiled last to ensure it appear in the inner-most tile
 	int ub[4] = {M, N, R, C}; // holds the ub for smooter programing
