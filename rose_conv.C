@@ -53,13 +53,16 @@ if(!in.empty()){in>> hold_in; in_buff[a1][b1][c1] = hold_in;}
           }
           compute:
           for (row = _lt_var_row; row <= (((12 < (_lt_var_row + 7 - 1))?12 : (_lt_var_row + 7 - 1))); row += 1) {
+#pragma HLS loop_tripcount min=6 max=7                      
             for (col = _lt_var_col; col <= (((12 < (_lt_var_col + 7 - 1))?12 : (_lt_var_col + 7 - 1))); col += 1) {
+#pragma HLS loop_tripcount min=6 max=7                      
               for (i = 0; i < 3; i++) {
                 for (j = 0; j < 3; j++) {
                   for (ti = _lt_var_ti; ti <= (((255 < (_lt_var_ti + 3 - 1))?255 : (_lt_var_ti + 3 - 1))); ti += 1) {
+#pragma HLS loop_tripcount min=2 max=3                      
 #pragma HLS UNROLL factor = 3
                     for (to = _lt_var_to; to <= (((191 < (_lt_var_to + 65 - 1))?191 : (_lt_var_to + 65 - 1))); to += 1) {
-                      
+#pragma HLS loop_tripcount min=64 max=65                      
 #pragma HLS UNROLL factor = 65
 /* 
 out[to][row][col] += (w[to][ti][i][j] * in[ti][row + i][col + j]);
