@@ -1,10 +1,3 @@
-/*
- * A boiler plate starter file for using ROSE
- *
- * Input: sequential C/C++ code
- * Output: same C/C++ code 
- *
- */
 
 #include "rose.h"
 #include <iostream>
